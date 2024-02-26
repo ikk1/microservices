@@ -1,0 +1,6 @@
+[submodule "studentRegistrationService"]
+	path = studentRegistrationService
+	url = https://github.com/ikk1/studentRegistrationService
+[submodule "emailService"]
+	path = emailService
+	url = https://github.com/ikk1/emailService

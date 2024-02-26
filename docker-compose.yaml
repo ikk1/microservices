@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    volumes:
+      - ./rabbit_cfg/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbit_cfg/definitions.json:/etc/rabbitmq/definitions.json:ro
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: vesper
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - micro-network
+
+  student-app:
+    build:
+      context: ./student-registration-service
+      dockerfile: Dockerfile
+    container_name: student-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=vesper
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/student
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=vesper
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_MAIL_USERNAME=junior.microservices@gmail.com
+      - SPRING_MAIL_PASSWORD=mcog dxej dixf yojc
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+    
+    networks:
+      - micro-network
+
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    container_name: email-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      student-app:
+        condition: service_started
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=vesper
+    networks:
+      - micro-network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: student
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vesper
+    networks:
+      - micro-network
+
+networks:
+  micro-network:
+    driver: bridge
