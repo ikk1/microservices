@@ -23,7 +23,7 @@ services:
 
   student-app:
     build:
-      context: ./student-registration-service
+      context: ./studentRegistrationService
       dockerfile: Dockerfile
     container_name: student-app
     ports:
