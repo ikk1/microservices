@@ -36,8 +36,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=vesper
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_MAIL_USERNAME=junior.microservices@gmail.com
-      - SPRING_MAIL_PASSWORD=mcog dxej dixf yojc
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -49,7 +47,7 @@ services:
 
   email-service:
     build:
-      context: ./email-service
+      context: ./emailService
       dockerfile: Dockerfile
     container_name: email-service
     depends_on:
@@ -61,6 +59,10 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=vesper
+      - SPRING_MAIL_USERNAME=junior.microservices@gmail.com
+      - SPRING_MAIL_PASSWORD=mcog dxej dixf yojc
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
     networks:
       - micro-network
 
